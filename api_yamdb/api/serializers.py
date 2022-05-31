@@ -26,3 +26,15 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    pass
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    pass
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    pass

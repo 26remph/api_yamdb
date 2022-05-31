@@ -3,10 +3,16 @@ from rest_framework import filters, viewsets
 from reviews.models import Comment, Review, User, Category, Genre, Title
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .serializers import CommentSerializer, ReviewSerializer, CategorySerializer, GenreSerializer, TitleSerializer
+from .serializers import (
+    CommentSerializer,
+    ReviewSerializer,
+    CategorySerializer,
+    GenreSerializer,
+    TitleSerializer
+)
 
 
-class CategoryViewSet(viewsets.ModelVIewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter)
