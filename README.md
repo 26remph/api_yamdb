@@ -86,7 +86,7 @@ GET-запросы
 /api/v1/titles/{title_id}/reviews/{review_id}/comments/
 ```
 ### Авторы
-_Вадим Барсуков, python-developer_  
-_Денис Мурашов, python-developer_
-_Юра Ананьин, python-developer_
+Вадим Барсуков, python-developer_  
+Денис Мурашов, python-developer_
+Юра Ананьин, python-developer_
 #
