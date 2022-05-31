@@ -32,6 +32,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('Category__slug', 'Genre__slug', 'name', 'year',)
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     """Вью сет для работы с комментариями."""
     serializer_class = CommentSerializer
