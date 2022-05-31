@@ -59,7 +59,7 @@ class Category(models.Model):
         return self.title
 
 
-class Genre(models.Models):
+class Genre(models.Model):
     """Модель для работы с жанрами произведений"""
     title = models.CharField(
         max_length=256,
