@@ -88,5 +88,5 @@ GET-запросы
 ### Авторы
 _Вадим Барсуков, python-developer_  
 _Денис Мурашов, python-developer_
-_Денис Мурашов, python-developer_
 _Юра Ананьин, python-developer_
+#
