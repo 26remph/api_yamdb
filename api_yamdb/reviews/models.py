@@ -1,9 +1,44 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # Create your models here.
 SLICE_REVIEW = 30
-User = get_user_model()
+
+
+class User(AbstractUser):
+    """
+    Модель пользователя.
+    """
+
+    USER_ROLES = (
+        ('USER', 'user'),
+        ('MODERATOR', 'moderator'),
+        ('ADMIN', 'admin')
+    )
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+    )
+    role = models.CharField(
+        'Роль',
+        max_length=255,
+        choices=USER_ROLES,
+        default='USER',
+        db_index=True
+    )
+    confirmation_code = models.TextField(
+        'Код подтверждения',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+
+    def __str__(self):
+        return str(self.username)
 
 
 class Review(models.Model):
@@ -79,3 +114,11 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:SLICE_REVIEW]
+
+
+class Title(models.Model):
+    pass
+
+
+class Review(models.Model):
+    pass
