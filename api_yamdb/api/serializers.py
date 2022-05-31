@@ -29,12 +29,15 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для упаковки категории"""
     pass
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для упаковки жанров"""
     pass
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для упаковки произведений"""
     pass
