@@ -6,6 +6,80 @@ SLICE_REVIEW = 30
 User = get_user_model()
 
 
+class Category(models.Model):
+    """Модель для работы с категориями произведений"""
+    title = models.CharField(
+        max_length=256,
+        verbose_name='Название категории'
+    )
+    slug = models.SlugField(
+        unique=True,
+        max_length=50,
+        verbose_name='Slug категории',
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class Genre(models.Models):
+    """Модель для работы с жанрами произведений"""
+    title = models.CharField(
+        max_length=256,
+        verbose_name='Название жанра'
+    )
+    slug = models.SlugField(
+        unique=True,
+        max_length=50,
+        verbose_name='Slug жанра',
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class Title(models.Model):
+    """Модель для работы с произведениями"""
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название произведения'
+    ),
+    year = models.IntegerField('Год выпуска'),
+    description = models.TextField(),
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='titles',
+        verbose_name='Жанр',
+        help_text='Укажите жанр произведения',
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='titles',
+        verbose_name='Категория',
+        help_text='Укажите категорию произведения'
+    )
+
+
+class GenreTitle(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='GenreTitles',
+        verbose_name='Жанр произведения',
+        help_text='Укажите жанр произведения',
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='GenreTitles'
+    )
+
+
 class Review(models.Model):
     """Модель для работы с отзывами на произведения"""
     title = models.ForeignKey(
