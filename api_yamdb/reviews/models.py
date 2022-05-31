@@ -1,16 +1,13 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 SLICE_REVIEW = 30
-User = get_user_model()
 
 
 class User(AbstractUser):
     """
-    Модель пользователя.
+    Кастомная модель пользователя.
     """
-
     USER_ROLES = (
         ('USER', 'user'),
         ('MODERATOR', 'moderator'),
