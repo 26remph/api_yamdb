@@ -1,17 +1,14 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # Create your models here.
 SLICE_REVIEW = 30
-User = get_user_model()
 
 
 class User(AbstractUser):
     """
-    Модель пользователя.
+    Кастомная модель пользователя.
     """
-
     USER_ROLES = (
         ('USER', 'user'),
         ('MODERATOR', 'moderator'),
@@ -59,7 +56,7 @@ class Category(models.Model):
         return self.title
 
 
-class Genre(models.Models):
+class Genre(models.Model):
     """Модель для работы с жанрами произведений"""
     title = models.CharField(
         max_length=256,
