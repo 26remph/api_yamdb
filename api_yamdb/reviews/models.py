@@ -82,6 +82,15 @@ class GenreTitle(models.Model):
 
 class Review(models.Model):
     """Модель для работы с отзывами на произведения"""
+    ONE, TWO, THREE, FOUR, FIVE = 1, 2, 3, 4, 5
+    SIX, SEVEN, EIGHT, NINE, TEN = 6, 7, 8, 9, 10
+
+    ANSWER_CHOICES = [
+        (1, ONE), (2, TWO), (3, THREE), (4, FOUR), (5, FIVE),
+        (6, SIX), (7, SEVEN), (8, EIGHT), (9, NINE), (10, TEN)
+    ]
+
+    score = models.IntegerField(choices=ANSWER_CHOICES, default=FIVE)
     title = models.ForeignKey(
         "Title",
         on_delete=models.CASCADE,
@@ -100,7 +109,6 @@ class Review(models.Model):
         verbose_name='Автор',
         help_text='Автор произведения',
     )
-    score = models.IntegerField()
     pub_date = models.DateTimeField(
         'Дата отзыва',
         auto_now_add=True,
