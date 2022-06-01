@@ -7,11 +7,17 @@ SLICE_REVIEW = 30
 class User(AbstractUser):
     """
     Кастомная модель пользователя.
+    Доп.поля: Био, Роль, Код подтверждения.
+    Методы: is_moderator, is_admin
     """
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+
     USER_ROLES = (
-        ('USER', 'user'),
-        ('MODERATOR', 'moderator'),
-        ('ADMIN', 'admin')
+        (USER, 'user'),
+        (MODERATOR, 'moderator'),
+        (ADMIN, 'admin')
     )
     bio = models.TextField(
         'Биография',
@@ -21,7 +27,7 @@ class User(AbstractUser):
         'Роль',
         max_length=255,
         choices=USER_ROLES,
-        default='USER',
+        default=USER,
         db_index=True
     )
     confirmation_code = models.TextField(
@@ -34,6 +40,12 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ('username',)
+
+    def is_moderator(self):
+        return self.role == User.MODERATOR
+
+    def is_admin(self):
+        return self.role == User.ADMIN or self.is_superuser
 
     def __str__(self):
         return str(self.username)
