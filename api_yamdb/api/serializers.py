@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from reviews.models import Comment, Review, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -30,14 +30,31 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки категории"""
-    pass
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки жанров"""
-    pass
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки произведений"""
-    pass
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'year',
+            # 'rating',
+            'description',
+            'genre',
+            'category',
+        )
+        model = Title

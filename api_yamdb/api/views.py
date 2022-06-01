@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, permissions
 from reviews.models import Comment, Review, User, Category, Genre, Title
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -15,22 +15,27 @@ from .serializers import (
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = (filters.SearchFilter)
-    search_fields = ('title',)
+    filter_backends = (filters.SearchFilter,)
+    # permission_classes = (permissions.AllowAny,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter)
-    search_fields = ('title',)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (permissions.AllowAny,)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('Category__slug', 'Genre__slug', 'name', 'year',)
+    # filterset_fields = ('name', 'year',)
+    permission_classes = (permissions.AllowAny,)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
