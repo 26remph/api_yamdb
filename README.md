@@ -1,7 +1,25 @@
-# Документация к API проекта YAMDB (v1)
-
-### Описание
+![](./api_yamdb/static/header.png)
+#Документация к API проекта YAMDB (v1)
 Проект YaMDb собирает отзывы пользователей на различные произведения;
+___
+![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray)
+![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
+![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
+
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/26remph/api_final_yatube)
+![GitHub repo size](https://img.shields.io/github/repo-size/26remph/api_yamdb)
+![GitHub](https://img.shields.io/github/license/26remph/api_yamdb)
+![pythonversion](https://img.shields.io/badge/python-%3E%3D3.7-blue)
+
+
+## Оглавление
+0. [Как запустить проект](#как-запустить-проект)
+1. [...](#cоздание-пользователей)
+2. [...](#документация-по-api)
+3. [...](#поиск-в-базе-данных)
+4. [...](#Демонстрационная-версия-API)
+5. [Об авторе](#об-авторе)
+
 
 ### Как запустить проект:
 
@@ -91,3 +109,8 @@ _Вадим Барсуков, python-developer_
 _Денис Мурашов, python-developer_
 _Юра Ананьин, python-developer_
 #
+
+___
+<p>
+    <span>© 2022, Contributors on git: 26Remph, viplod, okazivaetsya. ツ </span>
+</p>
