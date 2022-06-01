@@ -64,7 +64,7 @@ class Category(models.Model):
     )
 
     def __str__(self):
-        return self.name[:SLICE_REVIEW]
+        return self.slug
 
 
 class Genre(models.Model):
@@ -80,7 +80,7 @@ class Genre(models.Model):
     )
 
     def __str__(self):
-        return self.name[:SLICE_REVIEW]
+        return self.slug
 
 
 class Title(models.Model):
@@ -91,14 +91,7 @@ class Title(models.Model):
     )
     year = models.IntegerField('Год выпуска')
     description = models.TextField('Описание', blank=True, null=True)
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='titles',
-        verbose_name='Жанр',
-        help_text='Укажите жанр произведения',
-    )
+    genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -116,7 +109,7 @@ class GenreTitle(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='GenreTitles',
+        related_name='genretitles',
         verbose_name='Произведение',
         help_text='Укажите произведение',
     )
@@ -124,10 +117,13 @@ class GenreTitle(models.Model):
         Genre,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='GenreTitles',
+        related_name='genretitles',
         verbose_name='Жанр произведения',
         help_text='Укажите жанр произведения'
     )
+    
+    def __str__(self):
+        return f'{self.title} {self.genre}'
 
 
 class Review(models.Model):

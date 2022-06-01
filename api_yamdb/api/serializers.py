@@ -1,5 +1,13 @@
 from rest_framework import serializers, validators
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import (
+    Category,
+    Comment,
+    Genre,
+    GenreTitle,
+    Review,
+    Title,
+    User
+)
 from rest_framework.generics import get_object_or_404
 
 
@@ -46,6 +54,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки произведений"""
+    genre = GenreSerializer(many=True)
 
     class Meta:
         fields = (
@@ -58,6 +67,18 @@ class TitleSerializer(serializers.ModelSerializer):
             'category',
         )
         model = Title
+
+    # def create(self, validated_data):
+    #     genres = validated_data.pop('genre')
+    #     title = Title.objects.create(**validated_data)
+
+    #     for genre in genres:
+    #         # current_genre, status = Genre.objects.get_or_create(**genre)
+    #         current_genre = get_object_or_404(genre)
+    #         GenreTitle.objects.create(
+    #             title=title,
+    #             genre=current_genre,
+    #         )
 
 
 class UserSerializer(serializers.ModelSerializer):
