@@ -149,3 +149,4 @@ dmypy.json
 media/
 yatube_api/posts/static/
 api_yamdb/reviews/migrations/
+api_yamdb/reviews/migrations/0001_initial.py
