@@ -135,7 +135,7 @@ class Review(models.Model):
 
     score = models.IntegerField(choices=ANSWER_CHOICES, default=FIVE)
     title = models.ForeignKey(
-        "Title",
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Отзывы',
@@ -160,7 +160,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ['title'],
+        ordering = ('-pub_date',)
         verbose_name = 'Отзыв',
         verbose_name_plural = 'Отзывы'
 
