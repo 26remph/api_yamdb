@@ -1,19 +1,15 @@
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-
 from rest_framework.decorators import action
 from rest_framework import filters, viewsets, status, permissions
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from reviews.models import Review, User, Category, Genre, Title
 from django_filters.rest_framework import DjangoFilterBackend
 
+from reviews.models import Review, User, Category, Genre, Title
 from .permissions import AdminOnly
-
-
 from .serializers import (
     CommentSerializer,
     ReviewSerializer,
@@ -29,22 +25,27 @@ from .serializers import (
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = (filters.SearchFilter)
-    search_fields = ('title',)
+    filter_backends = (filters.SearchFilter,)
+    # permission_classes = (permissions.AllowAny,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter)
-    search_fields = ('title',)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (permissions.AllowAny,)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('Category__slug', 'Genre__slug', 'name', 'year',)
+    # filterset_fields = ('name', 'year',)
+    permission_classes = (permissions.AllowAny,)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
