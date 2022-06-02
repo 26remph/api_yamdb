@@ -111,16 +111,12 @@ class GenreTitle(models.Model):
         Title,
         on_delete=models.CASCADE,
         related_name='genretitles',
-        verbose_name='Произведение',
-        help_text='Укажите произведение',
     )
     genre = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,
         null=True,
         related_name='genretitles',
-        verbose_name='Жанр произведения',
-        help_text='Укажите жанр произведения'
     )
 
     def __str__(self):
