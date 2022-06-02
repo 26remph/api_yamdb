@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User
+from .models import Genre, User, Category
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -9,4 +9,16 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'role', )
 
 
+class CategorуAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    search_fields = ('name',)
+
+
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    search_fields = ('name',)
+
+
+admin.site.register(Category, CategorуAdmin)
+admin.site.register(Genre, GenreAdmin)
 admin.site.register(User, UserAdmin)

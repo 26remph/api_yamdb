@@ -1,5 +1,5 @@
 from rest_framework import serializers, validators
-from reviews.models import Comment, Review, User
+from reviews.models import Comment, Review, User, Category, Genre
 from rest_framework.generics import get_object_or_404
 
 
@@ -30,12 +30,18 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки категории"""
-    pass
+    class Meta:
+        model = Category
+        lookup_field = 'slug'
+        fields = '__all__'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки жанров"""
-    pass
+    class Meta:
+        model = Genre
+        lookup_field = 'slug'
+        fields = '__all__'
 
 
 class TitleSerializer(serializers.ModelSerializer):

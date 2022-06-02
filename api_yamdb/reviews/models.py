@@ -53,7 +53,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     """Модель для работы с категориями произведений"""
-    title = models.CharField(
+    name = models.CharField(
         max_length=256,
         verbose_name='Название категории'
     )
@@ -63,13 +63,17 @@ class Category(models.Model):
         verbose_name='Slug категории',
     )
 
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
     def __str__(self):
-        return self.title
+        return str(self.title)
 
 
 class Genre(models.Model):
     """Модель для работы с жанрами произведений"""
-    title = models.CharField(
+    name = models.CharField(
         max_length=256,
         verbose_name='Название жанра'
     )
@@ -78,6 +82,10 @@ class Genre(models.Model):
         max_length=50,
         verbose_name='Slug жанра',
     )
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.title

@@ -13,6 +13,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .permissions import AdminOnly
 
+from .mixins import (
+    PostDeleteByAdminOrReadOnlyMixin,
+    PostDeletePatchByAdminOrReadOnlyMixin
+)
+
 
 from .serializers import (
     CommentSerializer,
@@ -26,21 +31,21 @@ from .serializers import (
 )
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(PostDeleteByAdminOrReadOnlyMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter)
-    search_fields = ('title',)
+    search_fields = ('name',)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(PostDeleteByAdminOrReadOnlyMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter)
-    search_fields = ('title',)
+    search_fields = ('name',)
 
 
-class TitleViewSet(viewsets.ModelViewSet):
+class TitleViewSet(PostDeletePatchByAdminOrReadOnlyMixin):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
