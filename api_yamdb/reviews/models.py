@@ -53,7 +53,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     """Модель для работы с категориями произведений"""
-    title = models.CharField(
+    name = models.CharField(
         max_length=256,
         verbose_name='Название категории'
     )
@@ -64,12 +64,12 @@ class Category(models.Model):
     )
 
     def __str__(self):
-        return self.title
+        return self.slug
 
 
 class Genre(models.Model):
     """Модель для работы с жанрами произведений"""
-    title = models.CharField(
+    name = models.CharField(
         max_length=256,
         verbose_name='Название жанра'
     )
@@ -80,25 +80,18 @@ class Genre(models.Model):
     )
 
     def __str__(self):
-        return self.title
+        return self.slug
 
 
 class Title(models.Model):
     """Модель для работы с произведениями"""
     name = models.CharField(
         max_length=256,
-        verbose_name='Название произведения'
-    ),
-    year = models.IntegerField('Год выпуска'),
-    description = models.TextField(),
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='titles',
-        verbose_name='Жанр',
-        help_text='Укажите жанр произведения',
+        verbose_name='Название произведения',
     )
+    year = models.IntegerField('Год выпуска')
+    description = models.TextField('Описание', blank=True, null=True)
+    genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -108,21 +101,29 @@ class Title(models.Model):
         help_text='Укажите категорию произведения'
     )
 
+    def __str__(self):
+        return self.name[:SLICE_REVIEW]
+
 
 class GenreTitle(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='GenreTitles',
-        verbose_name='Жанр произведения',
-        help_text='Укажите жанр произведения',
+        related_name='genretitles',
+        verbose_name='Произведение',
+        help_text='Укажите произведение',
     )
     genre = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='GenreTitles'
+        related_name='genretitles',
+        verbose_name='Жанр произведения',
+        help_text='Укажите жанр произведения'
     )
+    
+    def __str__(self):
+        return f'{self.title} {self.genre}'
 
 
 class Review(models.Model):
