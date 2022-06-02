@@ -7,11 +7,17 @@ SLICE_REVIEW = 30
 class User(AbstractUser):
     """
     Кастомная модель пользователя.
+    Доп.поля: Био, Роль, Код подтверждения.
+    Методы: is_moderator, is_admin
     """
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+
     USER_ROLES = (
-        ('user', 'USER'),
-        ('moderator', 'MODERATOR'),
-        ('admin', 'ADMIN')
+        (USER, 'user'),
+        (MODERATOR, 'moderator'),
+        (ADMIN, 'admin')
     )
     bio = models.TextField(
         'Биография',
@@ -21,7 +27,7 @@ class User(AbstractUser):
         'Роль',
         max_length=255,
         choices=USER_ROLES,
-        default='user',
+        default=USER,
         db_index=True
     )
     confirmation_code = models.TextField(
@@ -34,6 +40,12 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ('username',)
+
+    def is_moderator(self):
+        return self.role == User.MODERATOR
+
+    def is_admin(self):
+        return self.role == User.ADMIN or self.is_superuser
 
     def __str__(self):
         return str(self.username)
@@ -75,18 +87,11 @@ class Title(models.Model):
     """Модель для работы с произведениями"""
     name = models.CharField(
         max_length=256,
-        verbose_name='Название произведения'
-    ),
-    year = models.IntegerField('Год выпуска'),
-    description = models.TextField(),
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='titles',
-        verbose_name='Жанр',
-        help_text='Укажите жанр произведения',
+        verbose_name='Название произведения',
     )
+    year = models.IntegerField('Год выпуска')
+    description = models.TextField('Описание', blank=True, null=True)
+    genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -96,21 +101,29 @@ class Title(models.Model):
         help_text='Укажите категорию произведения'
     )
 
+    def __str__(self):
+        return self.name[:SLICE_REVIEW]
+
 
 class GenreTitle(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='GenreTitles',
-        verbose_name='Жанр произведения',
-        help_text='Укажите жанр произведения',
+        related_name='genretitles',
+        verbose_name='Произведение',
+        help_text='Укажите произведение',
     )
     genre = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='GenreTitles'
+        related_name='genretitles',
+        verbose_name='Жанр произведения',
+        help_text='Укажите жанр произведения'
     )
+    
+    def __str__(self):
+        return f'{self.title} {self.genre}'
 
 
 class Review(models.Model):
@@ -119,8 +132,8 @@ class Review(models.Model):
     SIX, SEVEN, EIGHT, NINE, TEN = 6, 7, 8, 9, 10
 
     ANSWER_CHOICES = [
-        (ONE, '1'), (TWO, '2'), (THREE, '3'), (FOUR, '4'), (FIVE, '5'),
-        (SIX, '6'), (SEVEN, '7'), (EIGHT, '8'), (NINE, '9'), (TEN, '10')
+        (1, ONE), (2, TWO), (3, THREE), (4, FOUR), (5, FIVE),
+        (6, SIX), (7, SEVEN), (8, EIGHT), (9, NINE), (10, TEN)
     ]
 
     score = models.IntegerField(choices=ANSWER_CHOICES, default=FIVE)
@@ -150,8 +163,8 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ('-pub_date', )
-        verbose_name = 'Отзыв'
+        ordering = ['title'],
+        verbose_name = 'Отзыв',
         verbose_name_plural = 'Отзывы'
 
         indexes = [
@@ -183,13 +196,13 @@ class Comment(models.Model):
     text = models.TextField(
         verbose_name='Текст комментария',
     )
-    pub_date = models.DateTimeField(
+    created = models.DateTimeField(
         'Дата комментария',
         auto_now_add=True
     )
 
     class Meta:
-        ordering = ('-pub_date', )
+        ordering = ('-created',)
         verbose_name = 'Комментарий'
 
     def __str__(self):
