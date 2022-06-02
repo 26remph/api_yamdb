@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 SLICE_REVIEW = 30
 
@@ -132,8 +133,8 @@ class Review(models.Model):
     SIX, SEVEN, EIGHT, NINE, TEN = 6, 7, 8, 9, 10
 
     ANSWER_CHOICES = [
-        (1, ONE), (2, TWO), (3, THREE), (4, FOUR), (5, FIVE),
-        (6, SIX), (7, SEVEN), (8, EIGHT), (9, NINE), (10, TEN)
+        (ONE, '1'), (TWO, '2'), (THREE, '3'), (FOUR, '4'), (FIVE, '5'),
+        (SIX, '6'), (SEVEN, '7'), (EIGHT, '8'), (NINE, '9'), (TEN, '10')
     ]
 
     score = models.IntegerField(choices=ANSWER_CHOICES, default=FIVE)
@@ -157,9 +158,9 @@ class Review(models.Model):
     )
     pub_date = models.DateTimeField(
         'Дата отзыва',
-        auto_now_add=True,
-        db_index=True,
-
+        # auto_now_add=True,
+        # db_index=True,
+        default=timezone.now,
     )
 
     class Meta:
@@ -196,13 +197,14 @@ class Comment(models.Model):
     text = models.TextField(
         verbose_name='Текст комментария',
     )
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата комментария',
-        auto_now_add=True
+        # auto_now_add=True
+        default=timezone.now,
     )
 
     class Meta:
-        ordering = ('-created',)
+        ordering = ('-pub_date',)
         verbose_name = 'Комментарий'
 
     def __str__(self):

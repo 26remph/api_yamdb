@@ -1,38 +1,119 @@
+"""
+Модуль initdata используется для загрузки первоначальных данных моделей
+
+    Основное применение - запускается из командной строки как
+    managment команда.
+
+    Имеет два режима запуска:
+
+    -- без парамтров
+
+    python manage.py initdata
+
+    В данном режиме модуль пробует загрузить все модели указанные в словаре
+    `ordered_load_models`. Подходит для загрузки в только что созданную базу.
+
+    Note:
+        Порядок загрузки имеет значение из за свяанных полей.
+        Так модель Comment`, не может быть загружена впред `User`, в силу того
+        что модель `Comment` имеет обязательное поле User, которое
+        она не сможет получить в силу пустой таблицы `User`.
+
+    -- с параметром --models
+
+    python manage.py initdata --models User Genre Category
+
+    В данном режиме модуль попроробует загрузить все модели перечисленные
+    через пробел. Допускается указание одной модели.
+
+    Note:
+        Порядок загрузки определяет пользователь. Подходит для ручной
+        перезагрузки моделей. Можно очистить руками таблицу базы данных и
+        загрузить заново в нее данные по средствам команды описаной выше.
+
+    Attributes
+    ----------
+    STATICFILES_DIRS : str
+        какталог для статических файлов проекта
+    MODELS_MODULE_NAME : str
+        название модуля с моделями
+    model_file_link : dict
+        словарь связей модели с загружаемым файлом
+        key : название модели
+        val: название файла хранения данных
+
+    model_fields_link: dict
+        справочник для ручной связи полей модели с полем файла загрузки данных
+        если связь не найдена, модуль пытается разрешить ее один в один.
+
+    date_name_fields: list
+        список имен полей в моделях, которые надо обрабатывать как поля даты
+    ordered_load_models: tuple
+        УпорядоченныйкКортеж с названиями моделей для загрузки, может быть
+        расширен в случае появления дополнительных моделей в проект.
+
+    Methods
+    -------
+    get_model(model_name)
+        Получает модель по имени из коммандной строки или из кортежа
+
+    get_model_csv_filename(name)
+        получает имя файла для загрузки модели.
+
+    create_kwargs(headers, row)
+        получает заголовок csv файла с именами полей и текущую строку
+        со значениями. Если заголовок поля файла это модель, то получает
+        значение связанной модели, елси дата, то преобразует в формат
+        datetime.datetime.
+
+        Возвращает словарь, где ключи соответствуют названиям полей модели,
+        а значения значениям для загрузки в модель.
+"""
+
 import csv
-# import importlib.util
+import datetime
 import os.path
 
+import pytz
 from django.core.management.base import BaseCommand, CommandError
 
 from api_yamdb.settings import STATICFILES_DIRS
 
-# import time
+MODELS_MODULE_NAME = 'reviews.models'
 
+model_file_link = {
+    'User': 'users',
+    'Title': 'titles',
+    'Comment': 'comments',
+    'GenreTitle': 'genre_title'
+}
 
-ordered_cvs_files = (
-    'users', 'category', 'genre',
-    'titles', 'genre_title', 'review', 'comments'
+model_fields_link = {
+    'author': 'User',
+}
+
+date_name_fields = ['pub_date']
+
+ordered_load_models = (
+    'User', 'Category', 'Genre',
+    'Title', 'GenreTitle', 'Review', 'Comment'
 )
 
 
 def get_model(model_name):
-    model_name = model_name.capitalize()
-    if model_name.endswith('s'):
-        model_name = model_name[:-1]
+    """
+    Получаем модель по имени из командной строки,
+    либо из настроечной константы tuple: ordered_load_models
+    """
+    if link_name := model_fields_link.get(model_name.lower()):
+        model_name = link_name
 
-    print(model_name)
     try:
-        mod = __import__('reviews.models', fromlist=[model_name])
-    except Exception:
-        print(f"Can't import model `{model_name}`")
+        mod = __import__(MODELS_MODULE_NAME, fromlist=[model_name])
+    except ImportError:
+        print(f"Can't import model '{model_name}' from `{MODELS_MODULE_NAME}.")
         return None
-    # module_spec = importlib.util.find_spec(model_name)
-    # # print(module_spec, type(module_spec))
-    # if module_spec is not None:
-    #     return True
-    print(type(mod))
-    print(dir(mod))
-    print(mod.__name__)
+
     try:
         model = getattr(mod, model_name)
     except AttributeError:
@@ -41,63 +122,75 @@ def get_model(model_name):
     return model
 
 
-def get_model_cvs_filename(name):
+def get_model_csv_filename(name):
+    """
+    Получаем файл csv с данными по имени модели.
+
+    Для имен файлов не совпадающих с именами модели, используем ручную
+    настройку через
+    dict: model_file_link
+    """
+    if link_name := model_file_link.get(name):
+        name = link_name
+
     csv_file = f'{name.lower()}.csv'
     file_path = f'{STATICFILES_DIRS[0]}data/{csv_file}'
     return file_path if os.path.isfile(file_path) else None
 
 
-def create_kwargs(headers: list, row: list):
-    
+def create_kwargs(headers, row):
+    """
+    Создаем словарь из строки файла с параметрами загрузки.
+    Ключи это поля модели. Значения это значения для установки в модель.
+
+    """
     kwargs = {'id': headers[0]}
 
     for count, value in enumerate(row):
         title = headers[count]
         if title.endswith('_id'):
-            title = title[:-2]
+            title = title[:-3]
 
         model = get_model(title.capitalize())
         kwargs[title] = value
 
-        if title == 'year':
-            kwargs[title] = int(value)
+        if title in date_name_fields:
+            frmt = "%Y-%m-%dT%H:%M:%S.%fZ"
+            date = datetime.datetime.strptime(value, frmt)
+            kwargs[title] = pytz.utc.localize(date)
 
         if model:
             try:
                 kwargs[title] = model.objects.get(pk=int(value))
             except model.DoesNotExist:
                 raise CommandError(
-                    f'Related model {title} does not exist element id={value}'
+                    f'Related model `{title}` does not exist '
+                    f'element id={value}'
                 )
 
     return kwargs
 
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
+    """Класс для работы с кастомными менеджмент коммандами"""
+    help = 'Loads initial data for models'
 
     def add_arguments(self, parser):
-        parser.add_argument('--models', nargs='+', type=str, default=['all'])
+        parser.add_argument('--models', nargs='+', type=str, default='--all')
 
     def handle(self, *args, **options):
-        # models: str = options['models'][0]
-        models: str = options['models']
-        source = ordered_cvs_files if models == 'all' else models
+
+        source = options['models']
+        if options['models'] == '--all':
+            source = ordered_load_models
+
         for name in source:
             model = get_model(name)
-            file = get_model_cvs_filename(name)
-            # try:
-            #     poll = Poll.objects.get(pk=poll_id)
-            # except Poll.DoesNotExist:
-            #     raise CommandError('Poll "%s" does not exist' % poll_id)
-            #
-            # poll.opened = False
-            # poll.save()
-            print('file=', file)
+            file = get_model_csv_filename(name)
             if not all([model, file]):
                 self.stdout.write(
                     self.style.ERROR(
-                        f'Error loads model: {name} from file: {file}"'
+                        f'Error loads model: `{name}` from file: {file}"'
                     )
                 )
                 continue
@@ -107,20 +200,13 @@ class Command(BaseCommand):
                 headers = next(reader)
                 for count, row in enumerate(reader):
                     kwargs = create_kwargs(headers, row)
-                    print('kwargs', kwargs)
-                    obj, created = model.objects.update_or_create(
-                        id=kwargs['id'], defaults=kwargs
-                    )
 
                     try:
-                        # obj = model.objects.create(**kwargs)
-                        obj, created = model.objects.update_or_create(
+                        model.objects.update_or_create(
                             id=kwargs['id'], defaults=kwargs
                         )
                     except Exception:
                         raise CommandError('Can`t create model "%s"' % name)
-
-                    print('obj', obj)
 
             self.stdout.write(
                 self.style.SUCCESS(
