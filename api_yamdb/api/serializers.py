@@ -55,18 +55,35 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки произведений"""
     genre = GenreSerializer(many=True)
+    # genre = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
             'id',
             'name',
             'year',
-            # 'rating',
+            'rating',
             'description',
             'genre',
             'category',
         )
         model = Title
+
+    def get_rating(self, obj):
+        return 5
+
+    # def get_genre(self, obj):
+    #     queryset = GenreTitle.objects.filter(title=obj.id)
+    #     print(queryset)
+    #     return GenreSerializer(queryset , many=True).data
+    # def get_genre(self, obj):
+    #     print('!!!!!!!!!!!!')
+    #     print(list(obj.genretitles.all()))
+    # #     # title = get_object_or_404(obj.id)
+    # #     # print(title)
+    #     print('!!!!!!!!!!!!')
+    #     return list(obj.genretitles.all())
 
     # def create(self, validated_data):
     #     genres = validated_data.pop('genre')
@@ -79,6 +96,13 @@ class TitleSerializer(serializers.ModelSerializer):
     #             title=title,
     #             genre=current_genre,
     #         )
+
+
+class GenreTitles(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('title', 'genre')
+        model = GenreTitle
 
 
 class UserSerializer(serializers.ModelSerializer):
