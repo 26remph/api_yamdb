@@ -37,10 +37,6 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Category
 
-    def create(self, validated_data):
-        print('validated_data=', validated_data)
-        return None
-
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки жанров"""
@@ -48,28 +44,6 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Genre
-
-    def create(self, validated_data):
-        print('validated_data=', validated_data)
-        return None
-
-
-class GenreReadWriteField(serializers.Field):
-
-    def to_representation(self, value):
-        print('to_representation - > ', '-' * 50)
-        print('self=', self)
-        print('dir=', dir(self))
-        print('value=', value)
-        # value = {'slug': 'unknown'}
-
-        return value
-
-    def to_internal_value(self, data):
-        print('to_internal_value - > ', '-' * 50)
-        print('self=', self)
-        print('data=', data)
-        return data
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -89,12 +63,9 @@ class TitleSerializer(serializers.ModelSerializer):
         return 0
 
     def validate(self, data):
-        print('validate - > ', '-' * 50)
-        print('validate self=', self)
-        print('validate initial_data=', self.initial_data)
-        print('validate data=', data)
-        print('type data=', data)
-        # --------
+        """Получаем первоначальные данные, переданные в поле `genre`
+        и поле `category`, проводим их валидацию.
+        """
 
         if not (init_genre := self.initial_data.get('genre')):
             raise ValidationError(
@@ -128,65 +99,10 @@ class TitleSerializer(serializers.ModelSerializer):
 
         return data
 
-    # def validate_genre(self, value):
-    #     """Нормализует входящие данные для записи в базу данных"""
-    #     print('validate_genre - > ', '-' * 50)
-    #     print('self=', self)
-    #     print('value=', value)
-    #
-    #     if not(isinstance(value, list)):
-    #         raise ValidationError(
-    #             f"Invalid data. Expected a list, but got `{type(value)}`."
-    #         )
-    #     normalize_data = []
-    #     genre_dict = {}
-    #     for elem in value:
-    #         if not (isinstance(elem, str)):
-    #             raise ValidationError(
-    #                 f"Invalid data. Expected a `str`, but got `{type(elem)}`."
-    #             )
-    #         try:
-    #             genre_obj = Genre.objects.get(slug=elem)
-    #         except Genre.DoesNotExist:
-    #             raise ValidationError(
-    #                 f"Slug genre category `{elem}` does not exists."
-    #             )
-    #
-    #         genre_dict['name'] = genre_obj.name
-    #         genre_dict['slug'] = genre_obj.slug
-    #
-    #         if genre_dict in normalize_data:
-    #             raise ValidationError(
-    #                 f"Data not unique `{value}`"
-    #             )
-    #
-    #         normalize_data.append(genre_dict.copy())
-    #
-    #     return normalize_data
-
-    def get_genre(self, obj):
-        print('get_genre - > ', '-' * 50)
-        print('self=', self)
-        print('obj=', obj)
-        return obj
-
     def create(self, validated_data):
-        print('CREATE ->', '-' * 50)
-        print('validated_data=', validated_data)
-        print('validated_data type=', type(validated_data))
-        print('self create =', self)
-
-        # raise ValidationError('DEBUG stop')
-        # genres = validated_data.get('genre')
         genres = validated_data.pop('genre')
-        print('pop validated_data=', validated_data)
-        print('genres=', genres)
-
         title, status = Title.objects.get_or_create(**validated_data)
-        print('title=', title)
-        print('title=', status)
         genre = Genre.objects.filter(slug__in=genres)
-        print('genre=', genre)
         title.genre.set(genre)
 
         return title
