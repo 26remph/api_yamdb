@@ -9,28 +9,27 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
 
-from .permissions import AdminOnly
+from .mixins import CreateListDeleteMixinSet
+from .permissions import AdminOnlyPermission
 from .serializers import (CategorySerializer, CommentSerializer,
                           ConfirmationSerializer, GenreSerializer,
                           ReviewSerializer, TitleSerializer,
                           UserCreateSerializer, UserSerializer)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(CreateListDeleteMixinSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
-    # permission_classes = (permissions.AllowAny,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(CreateListDeleteMixinSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (permissions.AllowAny,)
     lookup_field = 'slug'
 
 
@@ -76,7 +75,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AdminOnly, )
+    permission_classes = (AdminOnlyPermission, )
     pagination_class = LimitOffsetPagination
     lookup_field = 'username'
 
@@ -87,7 +86,7 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         """
-        Функция управления собственным аккаунтом.
+        Функция редактирования профайла.
         """
         if request.method.lower() == 'get':
             serializer = UserSerializer(instance=request.user)
