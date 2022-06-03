@@ -1,4 +1,5 @@
 from rest_framework import serializers, validators
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
                             Title, User)
@@ -47,48 +48,64 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки произведений"""
-    genre = GenreSerializer(many=True)
-    # genre = serializers.SerializerMethodField()
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
     rating = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
-            'id',
-            'name',
-            'year',
-            'rating',
-            'description',
-            'genre',
-            'category',
+            'id', 'name', 'year', 'rating',
+            'description', 'genre', 'category',
         )
         model = Title
 
     def get_rating(self, obj):
-        return 5
+        return 0
 
-    # def get_genre(self, obj):
-    #     queryset = GenreTitle.objects.filter(title=obj.id)
-    #     print(queryset)
-    #     return GenreSerializer(queryset , many=True).data
-    # def get_genre(self, obj):
-    #     print('!!!!!!!!!!!!')
-    #     print(list(obj.genretitles.all()))
-    # #     # title = get_object_or_404(obj.id)
-    # #     # print(title)
-    #     print('!!!!!!!!!!!!')
-    #     return list(obj.genretitles.all())
+    def validate(self, data):
+        """Получаем первоначальные данные, переданные в поле `genre`
+        и поле `category`, проводим их валидацию.
+        """
 
-    # def create(self, validated_data):
-    #     genres = validated_data.pop('genre')
-    #     title = Title.objects.create(**validated_data)
+        if not (init_genre := self.initial_data.get('genre')):
+            raise ValidationError(
+                '`genre` field: This field is required.'
+            )
+        if not(isinstance(init_genre, list)):
+            raise ValidationError(
+                f'`genre`: Invalid data. Expected a list, '
+                f'but got `{type(init_genre)}`. '
+            )
 
-    #     for genre in genres:
-    #         # current_genre, status = Genre.objects.get_or_create(**genre)
-    #         current_genre = get_object_or_404(genre)
-    #         GenreTitle.objects.create(
-    #             title=title,
-    #             genre=current_genre,
-    #         )
+        for slug in init_genre:
+            if not Genre.objects.filter(slug=slug).exists():
+                raise ValidationError(
+                    f'`genre`: Does not exist slug str `{slug}`.'
+                )
+
+        data['genre'] = init_genre
+
+        if not (init_category := self.initial_data.get('category')):
+            raise ValidationError(
+                '`category`: This field is required.'
+            )
+
+        if not Category.objects.filter(slug=init_category).exists():
+            raise ValidationError(
+                f'`category`: Does not exist slug str `{init_category}.`'
+            )
+
+        data['category'] = Category.objects.get(slug=init_category)
+
+        return data
+
+    def create(self, validated_data):
+        genres = validated_data.pop('genre')
+        title, status = Title.objects.get_or_create(**validated_data)
+        genre = Genre.objects.filter(slug__in=genres)
+        title.genre.set(genre)
+
+        return title
 
 
 class GenreTitles(serializers.ModelSerializer):

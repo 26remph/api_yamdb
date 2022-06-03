@@ -66,6 +66,9 @@ class Category(models.Model):
         verbose_name='Slug категории',
     )
 
+    class Meta:
+        ordering = ('slug',)
+
     def __str__(self):
         return self.slug
 
@@ -81,6 +84,9 @@ class Genre(models.Model):
         max_length=50,
         verbose_name='Slug жанра',
     )
+
+    class Meta:
+        ordering = ('slug',)
 
     def __str__(self):
         return self.slug
