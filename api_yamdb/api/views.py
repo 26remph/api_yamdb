@@ -24,6 +24,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
+    def perform_create(self, serializer):
+        print(' CategoryViewSet perform_create self=', self)
+        print("serializer= ", serializer)
+
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
@@ -33,6 +37,10 @@ class GenreViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.AllowAny,)
     lookup_field = 'slug'
 
+    def perform_create(self, serializer):
+        print('GenreViewSet perform_create self=', self)
+        print("serializer", serializer)
+
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
@@ -40,6 +48,21 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     # filterset_fields = ('name', 'year',)
     permission_classes = (permissions.AllowAny,)
+
+    # def get_serializer_class(self):
+    #     print('TitleViewSet ->', '-' * 50)
+    #     print('get_serializer_class self=', ...)
+    #     print('self.action', self.action)
+    #
+    #     if self.action == 'list':
+    #         return TitleReadSerializer
+    #     return TitleSerializer
+
+    # def perform_create(self, serializer):
+    #     print('TitleViewSet ->', '-' * 50)
+    #     print('perform_create self=', self)
+    #     print("serializer=", serializer)
+
 
 
 class CommentViewSet(viewsets.ModelViewSet):
