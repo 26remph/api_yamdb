@@ -195,7 +195,7 @@ class Command(BaseCommand):
                 )
                 continue
 
-            with open(file, 'r') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 reader = csv.reader(f)
                 headers = next(reader)
                 for count, row in enumerate(reader):
