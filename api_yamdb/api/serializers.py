@@ -66,22 +66,26 @@ class TitleSerializer(serializers.ModelSerializer):
         """Получаем первоначальные данные, переданные в поле `genre`
         и поле `category`, проводим их валидацию.
         """
-
         if not (init_genre := self.initial_data.get('genre')):
             raise ValidationError(
                 '`genre` field: This field is required.'
             )
-        if not(isinstance(init_genre, list)):
+
+        if not(type(init_genre) in (str, list)):
             raise ValidationError(
-                f'`genre`: Invalid data. Expected a list, '
-                f'but got `{type(init_genre)}`. '
+                f'`genre`: Invalid data format `{init_genre}`.'
+                f'Expected a list or str, but got `{type(init_genre)}`.'
             )
 
-        for slug in init_genre:
-            if not Genre.objects.filter(slug=slug).exists():
-                raise ValidationError(
-                    f'`genre`: Does not exist slug str `{slug}`.'
-                )
+        if type(init_genre) == str:
+            init_genre = [init_genre]
+
+        if type(init_genre) == list:
+            for slug in init_genre:
+                if not Genre.objects.filter(slug=slug).exists():
+                    raise ValidationError(
+                        f'`genre`: Does not exist slug str `{slug}`.'
+                    )
 
         data['genre'] = init_genre
 

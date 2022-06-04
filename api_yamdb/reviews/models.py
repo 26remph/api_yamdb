@@ -41,7 +41,7 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ('username',)
-    
+
     @property
     def is_moderator(self):
         return self.role == User.MODERATOR
@@ -113,6 +113,9 @@ class Title(models.Model):
     def __str__(self):
         return self.name[:SLICE_REVIEW]
 
+    class Meta:
+        ordering = ('name',)
+
 
 class GenreTitle(models.Model):
     title = models.ForeignKey(
@@ -129,6 +132,9 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.title} {self.genre}'
+
+    class Meta:
+        ordering = ('genre',)
 
 
 class Review(models.Model):
