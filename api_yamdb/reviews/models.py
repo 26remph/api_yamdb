@@ -118,6 +118,10 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """
+    Вспомогательна модель для модели Titles, поля genre.
+    Служит для реализации отношения many-to-many fields
+    """
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -168,8 +172,6 @@ class Review(models.Model):
     )
     pub_date = models.DateTimeField(
         'Дата отзыва',
-        # auto_now_add=True,
-        # db_index=True,
         default=timezone.now,
     )
 
@@ -209,7 +211,6 @@ class Comment(models.Model):
     )
     pub_date = models.DateTimeField(
         'Дата комментария',
-        # auto_now_add=True
         default=timezone.now,
     )
 
