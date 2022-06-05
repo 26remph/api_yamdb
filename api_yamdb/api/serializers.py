@@ -1,10 +1,11 @@
+import datetime as dt
+
+from django.db.models import Avg
 from rest_framework import serializers, validators
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
                             Title, User)
-from django.db.models import Avg
-import datetime as dt
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -132,6 +133,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        instance.save()
 
         return instance
 
