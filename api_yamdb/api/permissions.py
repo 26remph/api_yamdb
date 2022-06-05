@@ -27,6 +27,7 @@ class AuthorModeratorAdminOrReadOnly(permissions.BasePermission):
             or request.user.is_admin
         )
 
+
 class AdminOrReadonly(permissions.BasePermission):
     """
     Права доступа:
