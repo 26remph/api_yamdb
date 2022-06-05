@@ -1,6 +1,7 @@
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
+                                           FilterSet)
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -37,11 +38,23 @@ class GenreViewSet(CreateListDeleteMixinSet):
     lookup_field = 'slug'
 
 
+class CustomFilter(FilterSet):
+    genre = CharFilter(field_name="genre__slug", lookup_expr='exact')
+    category = CharFilter(field_name="category__slug", lookup_expr='exact')
+    name = CharFilter(field_name="name", lookup_expr='contains')
+
+    class Meta:
+        model = Title
+        fields = ['name', 'year', 'genre', 'category']
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
+    filter_backends = (DjangoFilterBackend, )
+    # filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
+    filterset_class = CustomFilter
+
     permission_classes = (AdminOrReadonly, )
 
 
