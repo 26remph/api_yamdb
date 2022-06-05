@@ -82,7 +82,6 @@ class TitleSerializer(serializers.ModelSerializer):
         """Получаем первоначальные данные, переданные в поле `genre`
         и поле `category`, проводим их валидацию.
         """
-
         if init_genre := self.initial_data.getlist('genre'):
 
             if not(type(init_genre) == list):

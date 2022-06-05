@@ -1,16 +1,15 @@
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
-                                           FilterSet)
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-# from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
 
+from .filters import TitleFilter
 from .mixins import CreateListDeleteMixinSet
 from .permissions import (AdminOnlyPermission, AdminOrReadonly,
                           AuthorModeratorAdminOrReadOnly)
@@ -21,6 +20,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 
 class CategoryViewSet(CreateListDeleteMixinSet):
+    """Вью сет для работы с категориями произведений"""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (AdminOrReadonly, )
@@ -30,6 +30,7 @@ class CategoryViewSet(CreateListDeleteMixinSet):
 
 
 class GenreViewSet(CreateListDeleteMixinSet):
+    """Вью сет для работы с жанрами произведений"""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (AdminOrReadonly, )
@@ -38,28 +39,17 @@ class GenreViewSet(CreateListDeleteMixinSet):
     lookup_field = 'slug'
 
 
-class CustomFilter(FilterSet):
-    genre = CharFilter(field_name="genre__slug", lookup_expr='exact')
-    category = CharFilter(field_name="category__slug", lookup_expr='exact')
-    name = CharFilter(field_name="name", lookup_expr='contains')
-
-    class Meta:
-        model = Title
-        fields = ['name', 'year', 'genre', 'category']
-
-
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вью сет для работы с произведениями"""
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend, )
-    # filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
-    filterset_class = CustomFilter
-
+    filterset_class = TitleFilter
     permission_classes = (AdminOrReadonly, )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """Вью сет для работы с комментариями."""
+    """Вью сет для работы с комментариями к произведениям."""
     serializer_class = CommentSerializer
     permission_classes = (AuthorModeratorAdminOrReadOnly, )
 
@@ -75,7 +65,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """Вью сет для работы с отзывами"""
+    """Вью сет для работы с отзывами на произведения"""
     serializer_class = ReviewSerializer
     permission_classes = (AuthorModeratorAdminOrReadOnly, )
 
@@ -94,13 +84,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    Вьюсет для модели User
-    """
+    """Вьюсет для модели User"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AdminOnlyPermission, )
-    # pagination_class = LimitOffsetPagination
     lookup_field = 'username'
 
     @action(
@@ -111,6 +98,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         """
         Функция редактирования профайла.
+        Показывает учетные данные авторизованного пользователя.
+        Дает возможность их отредактировать.
         """
         if request.method.lower() == 'get':
             serializer = UserSerializer(instance=request.user)
@@ -162,7 +151,7 @@ class UserCreateAPIView(APIView):
 
 class ConfirmationAPIView(APIView):
     """
-    Класс для получения токена по конфирмейшн коду.
+    Класс для получения токена по коду подтверждения `confirmation_code`.
     """
     def post(self, request, *args, **kwargs):
         serializer = ConfirmationSerializer(data=request.data)
@@ -173,8 +162,7 @@ class ConfirmationAPIView(APIView):
             user.confirmation_code = ''
             user.save(update_fields=['confirmation_code'])
             return Response(
-                {'token':
-                 str(RefreshToken.for_user(user).access_token)},
+                {'token': str(RefreshToken.for_user(user).access_token)},
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
