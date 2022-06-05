@@ -66,28 +66,28 @@ class TitleSerializer(serializers.ModelSerializer):
         """Получаем первоначальные данные, переданные в поле `genre`
         и поле `category`, проводим их валидацию.
         """
-        if not (init_genre := self.initial_data.get('genre')):
-            raise ValidationError(
-                '`genre` field: This field is required.'
-            )
+        if init_genre := self.initial_data.get('genre'):
+            # raise ValidationError(
+            #     '`genre` field: This field is required.'
+            # )
 
-        if not(type(init_genre) in (str, list)):
-            raise ValidationError(
-                f'`genre`: Invalid data format `{init_genre}`.'
-                f'Expected a list or str, but got `{type(init_genre)}`.'
-            )
+            if not(type(init_genre) in (str, list)):
+                raise ValidationError(
+                    f'`genre`: Invalid data format `{init_genre}`.'
+                    f'Expected a list or str, but got `{type(init_genre)}`.'
+                )
 
-        if type(init_genre) == str:
-            init_genre = [init_genre]
+            if type(init_genre) == str:
+                init_genre = [init_genre]
 
-        if type(init_genre) == list:
-            for slug in init_genre:
-                if not Genre.objects.filter(slug=slug).exists():
-                    raise ValidationError(
-                        f'`genre`: Does not exist slug str `{slug}`.'
-                    )
+            if type(init_genre) == list:
+                for slug in init_genre:
+                    if not Genre.objects.filter(slug=slug).exists():
+                        raise ValidationError(
+                            f'`genre`: Does not exist slug str `{slug}`.'
+                        )
 
-        data['genre'] = init_genre
+            data['genre'] = init_genre
 
         if not (init_category := self.initial_data.get('category')):
             raise ValidationError(
@@ -110,6 +110,18 @@ class TitleSerializer(serializers.ModelSerializer):
         title.genre.set(genre)
 
         return title
+
+    def update(self, instance, validated_data):
+
+        if validated_data.get('genre'):
+            genres = validated_data.pop('genre')
+            genre = Genre.objects.filter(slug__in=genres)
+            instance.genre.set(genre)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        return instance
 
 
 class GenreTitles(serializers.ModelSerializer):
