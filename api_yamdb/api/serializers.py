@@ -64,7 +64,9 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         """Получаем среднюю оценку произведения по оценкам пользователей"""
-        rating = Review.objects.filter(title=obj.id).aggregate(Avg('score'))['score__avg']
+        rating = Review.objects.filter(
+            title=obj.id
+        ).aggregate(Avg('score'))['score__avg']
         if rating is not None:
             return round(rating)
         return None
@@ -80,26 +82,20 @@ class TitleSerializer(serializers.ModelSerializer):
         """Получаем первоначальные данные, переданные в поле `genre`
         и поле `category`, проводим их валидацию.
         """
-        if init_genre := self.initial_data.get('genre'):
-            # raise ValidationError(
-            #     '`genre` field: This field is required.'
-            # )
 
-            if not(type(init_genre) in (str, list)):
+        if init_genre := self.initial_data.getlist('genre'):
+
+            if not(type(init_genre) == list):
                 raise ValidationError(
                     f'`genre`: Invalid data format `{init_genre}`.'
-                    f'Expected a list or str, but got `{type(init_genre)}`.'
+                    f'Expected a list, but got `{type(init_genre)}`.'
                 )
 
-            if type(init_genre) == str:
-                init_genre = [init_genre]
-
-            if type(init_genre) == list:
-                for slug in init_genre:
-                    if not Genre.objects.filter(slug=slug).exists():
-                        raise ValidationError(
-                            f'`genre`: Does not exist slug str `{slug}`.'
-                        )
+            for slug in init_genre:
+                if not Genre.objects.filter(slug=slug).exists():
+                    raise ValidationError(
+                        f'`genre`: Does not exist slug str `{slug}`.'
+                    )
 
             data['genre'] = init_genre
 
@@ -114,6 +110,7 @@ class TitleSerializer(serializers.ModelSerializer):
             )
 
         data['category'] = Category.objects.get(slug=init_category)
+
         return data
 
     def create(self, validated_data):
