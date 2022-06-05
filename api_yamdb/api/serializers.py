@@ -3,6 +3,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
                             Title, User)
+from django.db.models import Avg
+import datetime as dt
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -60,7 +62,18 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
     def get_rating(self, obj):
-        return 0
+        """Получаем среднюю оценку произведения по оценкам пользователей"""
+        rating = Review.objects.filter(title=obj.id).aggregate(Avg('score'))['score__avg']
+        if rating is not None:
+            return round(rating)
+        return None
+
+    def validate_year(self, value):
+        """Валидация года выпуска произведения, сравнивая с текущим годом"""
+        now = dt.date.today().year
+        if value >= now:
+            raise serializers.ValidationError('Произведение еще не вышло')
+        return value
 
     def validate(self, data):
         """Получаем первоначальные данные, переданные в поле `genre`
@@ -100,7 +113,6 @@ class TitleSerializer(serializers.ModelSerializer):
             )
 
         data['category'] = Category.objects.get(slug=init_category)
-
         return data
 
     def create(self, validated_data):
