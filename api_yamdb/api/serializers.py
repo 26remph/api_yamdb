@@ -82,7 +82,8 @@ class TitleSerializer(serializers.ModelSerializer):
         """Получаем первоначальные данные, переданные в поле `genre`
         и поле `category`, проводим их валидацию.
         """
-        if init_genre := self.initial_data.getlist('genre'):
+        init_genre = self.initial_data.getlist('genre')
+        if init_genre:
 
             if not(type(init_genre) == list):
                 raise ValidationError(
@@ -98,7 +99,8 @@ class TitleSerializer(serializers.ModelSerializer):
 
             data['genre'] = init_genre
 
-        if not (init_category := self.initial_data.get('category')):
+        init_category = self.initial_data.get('category')
+        if not init_category:
             raise ValidationError(
                 '`category`: This field is required.'
             )

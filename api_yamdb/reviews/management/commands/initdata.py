@@ -105,7 +105,8 @@ def get_model(model_name):
     Получаем модель по имени из командной строки,
     либо из настроечной константы tuple: ordered_load_models
     """
-    if link_name := model_fields_link.get(model_name.lower()):
+    link_name = model_fields_link.get(model_name.lower())
+    if link_name:
         model_name = link_name
 
     try:
@@ -130,7 +131,8 @@ def get_model_csv_filename(name):
     настройку через
     dict: model_file_link
     """
-    if link_name := model_file_link.get(name):
+    link_name = model_file_link.get(name)
+    if link_name:
         name = link_name
 
     csv_file = f'{name.lower()}.csv'
