@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -98,7 +99,7 @@ class Title(models.Model):
         max_length=256,
         verbose_name='Название произведения',
     )
-    year = models.IntegerField('Год выпуска')
+    year = models.PositiveSmallIntegerField('Год выпуска')
     description = models.TextField('Описание', blank=True, null=True)
     genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(
@@ -110,11 +111,11 @@ class Title(models.Model):
         help_text='Укажите категорию произведения'
     )
 
-    def __str__(self):
-        return self.name[:SLICE_REVIEW]
-
     class Meta:
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name[:SLICE_REVIEW]
 
 
 class GenreTitle(models.Model):
@@ -134,24 +135,23 @@ class GenreTitle(models.Model):
         related_name='genretitles',
     )
 
-    def __str__(self):
-        return f'{self.title} {self.genre}'
-
     class Meta:
         ordering = ('genre',)
+
+    def __str__(self):
+        return f'{self.title} {self.genre}'
 
 
 class Review(models.Model):
     """Модель для работы с отзывами на произведения"""
-    ONE, TWO, THREE, FOUR, FIVE = 1, 2, 3, 4, 5
-    SIX, SEVEN, EIGHT, NINE, TEN = 6, 7, 8, 9, 10
 
-    ANSWER_CHOICES = [
-        (ONE, '1'), (TWO, '2'), (THREE, '3'), (FOUR, '4'), (FIVE, '5'),
-        (SIX, '6'), (SEVEN, '7'), (EIGHT, '8'), (NINE, '9'), (TEN, '10')
-    ]
-
-    score = models.IntegerField(choices=ANSWER_CHOICES, default=FIVE)
+    score = models.PositiveSmallIntegerField(
+        default=None,
+        validators=[
+            MinValueValidator(1, 'минимальная оценка 1'),
+            MaxValueValidator(10, 'максимальная оценка 10'),
+        ]
+    )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,

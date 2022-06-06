@@ -196,6 +196,17 @@ class UserCreateSerializer(serializers.ModelSerializer):
         required=True,
     )
 
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
+
     @staticmethod
     def validate_username(username):
         if username.lower() == 'me':
@@ -241,17 +252,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(message_dict)
         return attrs
 
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-        )
-
 
 class ConfirmationSerializer(serializers.ModelSerializer):
     """
@@ -260,6 +260,13 @@ class ConfirmationSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150, required=True)
     confirmation_code = serializers.CharField(required=True)
 
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'confirmation_code'
+        )
+
     def validate(self, attrs):
         user = get_object_or_404(User, username=attrs['username'])
         if not user.confirmation_code == attrs['confirmation_code']:
@@ -267,10 +274,3 @@ class ConfirmationSerializer(serializers.ModelSerializer):
                 {'confirmation_code': 'Неверный код подтверждения.'}
             )
         return attrs
-
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'confirmation_code'
-        )
